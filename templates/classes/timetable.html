@@ -1,0 +1,71 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Emploi du temps{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">Emploi du temps</h2>
+        <p class="page-subtitle">Consultation des emplois du temps par classe</p>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-6">
+                <label class="form-label small text-muted">Sélectionner une classe</label>
+                <select name="class" class="form-select" onchange="this.form.submit()">
+                    <option value="">Choisir une classe</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% if selected_class %}
+<div class="row g-3">
+    {% for day, slots in timetable.items %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-header bg-primary text-white fw-semibold">
+                {{ day|title }}
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for slot in slots %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <div class="fw-semibold text-primary">
+                                {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                            </div>
+                            <div>{{ slot.subject.name }}</div>
+                            <small class="text-muted">{{ slot.teacher|default:"Enseignant non assigné" }}</small>
+                        </div>
+                        {% if slot.room %}
+                        <span class="badge bg-light text-dark">{{ slot.room }}</span>
+                        {% endif %}
+                    </div>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted text-center py-4">
+                    Aucun cours
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info d-flex align-items-center">
+    <i class="bi bi-info-circle me-2 fs-5"></i>
+    Sélectionnez une classe pour afficher son emploi du temps.
+</div>
+{% endif %}
+{% endblock %}

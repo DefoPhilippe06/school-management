@@ -1,0 +1,171 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Gestion des Enseignants{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">Gestion des Enseignants</h2>
+        <p class="page-subtitle">Créer, modifier et affecter les enseignants</p>
+    </div>
+    <button class="btn btn-primary" onclick="openTeacherModal()">
+        <i class="bi bi-plus-lg me-1"></i> Nouvel enseignant
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom complet</th>
+                        <th>Spécialité</th>
+                        <th>Classes</th>
+                        <th>Matières</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for t in teachers %}
+                    <tr>
+                        <td class="fw-semibold text-primary">{{ t.matricule }}</td>
+                        <td>{{ t.user.get_full_name }}</td>
+                        <td>{{ t.specialization|default:"—" }}</td>
+                        <td>
+                            {% for c in t.classes.all %}
+                                <span class="badge bg-light text-dark me-1">{{ c.name }}</span>
+                            {% empty %}—{% endfor %}
+                        </td>
+                        <td>
+                            {% for s in t.subjects.all %}
+                                <span class="badge bg-secondary me-1">{{ s.code }}</span>
+                            {% empty %}—{% endfor %}
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    onclick="openTeacherModal(
+                                        {{ t.id }},
+                                        '{{ t.user.first_name }}',
+                                        '{{ t.user.last_name }}',
+                                        '{{ t.user.username }}',
+                                        '{{ t.user.email }}',
+                                        '{{ t.matricule }}',
+                                        '{{ t.specialization }}',
+                                        '{{ t.phone }}'
+                                    )">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a href="{% url 'teacher_delete' t.id %}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Supprimer {{ t.user.get_full_name }} ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">Aucun enseignant</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Enseignant -->
+<div class="modal fade" id="teacherModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'teacher_save' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="teacherModalTitle">Nouvel enseignant</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="teacher_id" id="teacher_id">
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" name="first_name" id="teacher_first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nom</label>
+                            <input type="text" name="last_name" id="teacher_last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" name="username" id="teacher_username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="teacher_email" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Matricule</label>
+                            <input type="text" name="matricule" id="teacher_matricule" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Spécialité</label>
+                            <input type="text" name="specialization" id="teacher_specialization" class="form-control">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Téléphone</label>
+                            <input type="text" name="phone" id="teacher_phone" class="form-control">
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Classes enseignées</label>
+                            <select name="classes" id="teacher_classes" class="form-select" multiple size="4">
+                                {% for c in classes %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Maintenir Ctrl pour sélection multiple</small>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label">Matières</label>
+                            <select name="subjects" id="teacher_subjects" class="form-select" multiple size="4">
+                                {% for s in subjects %}
+                                    <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                                {% endfor %}
+                            </select>
+                            <small class="text-muted">Maintenir Ctrl pour sélection multiple</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openTeacherModal(id = null, first = '', last = '', username = '', email = '', matricule = '', specialization = '', phone = '') {
+    document.getElementById('teacher_id').value = id || '';
+    document.getElementById('teacher_first_name').value = first || '';
+    document.getElementById('teacher_last_name').value = last || '';
+    document.getElementById('teacher_username').value = username || '';
+    document.getElementById('teacher_email').value = email || '';
+    document.getElementById('teacher_matricule').value = matricule || '';
+    document.getElementById('teacher_specialization').value = specialization || '';
+    document.getElementById('teacher_phone').value = phone || '';
+
+    // Désactiver le username en modification
+    document.getElementById('teacher_username').readOnly = !!id;
+
+    document.getElementById('teacherModalTitle').innerText = id ? 'Modifier l\'enseignant' : 'Nouvel enseignant';
+    new bootstrap.Modal(document.getElementById('teacherModal')).show();
+}
+</script>
+{% endblock %}

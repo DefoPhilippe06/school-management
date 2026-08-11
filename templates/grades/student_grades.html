@@ -1,0 +1,77 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Bulletin - {{ student.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title">Bulletin de notes</h2>
+        <p class="page-subtitle mb-0">
+            <strong>{{ student.user.get_full_name }}</strong> —
+            {{ student.matricule }} —
+            {{ student.current_class }} —
+            {{ current_year }}
+        </p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="{% url 'bulletin_pdf' student.id %}" class="btn btn-danger" target="_blank">
+            <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
+        </a>
+        <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">← Retour</a>
+    </div>
+</div>
+
+{% if subjects_data %}
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0 text-center">
+                <thead class="table-primary">
+                    <tr>
+                        <th rowspan="2" class="align-middle text-start">Matière</th>
+                        <th rowspan="2" class="align-middle">Coef</th>
+                        <th colspan="6">Séquences</th>
+                        <th colspan="3">Trimestres</th>
+                        <th rowspan="2" class="align-middle">Moy. Annuelle</th>
+                    </tr>
+                    <tr>
+                        <th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th>
+                        <th>T1</th><th>T2</th><th>T3</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for subject, data in subjects_data.items %}
+                    <tr>
+                        <td class="text-start fw-semibold">{{ subject.name }}</td>
+                        <td>{{ data.coefficient }}</td>
+                        <td>{{ data.sequences.1|default:"—" }}</td>
+                        <td>{{ data.sequences.2|default:"—" }}</td>
+                        <td>{{ data.sequences.3|default:"—" }}</td>
+                        <td>{{ data.sequences.4|default:"—" }}</td>
+                        <td>{{ data.sequences.5|default:"—" }}</td>
+                        <td>{{ data.sequences.6|default:"—" }}</td>
+                        <td class="fw-semibold">{{ data.trimesters.1|default:"—" }}</td>
+                        <td class="fw-semibold">{{ data.trimesters.2|default:"—" }}</td>
+                        <td class="fw-semibold">{{ data.trimesters.3|default:"—" }}</td>
+                        <td class="fw-bold text-primary">{{ data.annual|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-light border mt-4 small">
+    <strong>Légende :</strong>
+    T1 = (S1+S2)/2 &nbsp;•&nbsp;
+    T2 = (S3+S4)/2 &nbsp;•&nbsp;
+    T3 = (S5+S6)/2 &nbsp;•&nbsp;
+    Moyenne annuelle = moyenne des 3 trimestres
+</div>
+{% else %}
+<div class="alert alert-info">
+    Aucune note enregistrée pour cet élève sur l’année en cours.
+</div>
+{% endif %}
+{% endblock %}

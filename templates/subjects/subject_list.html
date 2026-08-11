@@ -1,0 +1,105 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Gestion des Matières{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">Gestion des Matières</h2>
+        <p class="page-subtitle">Créer, modifier et supprimer les matières</p>
+    </div>
+    <button class="btn btn-primary" onclick="openSubjectModal()">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle matière
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Code</th>
+                        <th>Coefficient</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in subjects %}
+                    <tr>
+                        <td class="fw-semibold">{{ s.name }}</td>
+                        <td><span class="badge bg-secondary">{{ s.code }}</span></td>
+                        <td>{{ s.coefficient }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    onclick="openSubjectModal({{ s.id }}, '{{ s.name }}', '{{ s.code }}', {{ s.coefficient }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a href="{% url 'subject_delete' s.id %}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Supprimer la matière {{ s.name }} ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">Aucune matière</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Matière -->
+<div class="modal fade" id="subjectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'subject_save' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="subjectModalTitle">Nouvelle matière</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="subject_id" id="subject_id">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de la matière</label>
+                        <input type="text" name="name" id="subject_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Code</label>
+                        <input type="text" name="code" id="subject_code" class="form-control" required placeholder="Ex: MATH">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Coefficient</label>
+                        <input type="number" name="coefficient" id="subject_coefficient" class="form-control" value="1" min="0.5" max="10" step="0.5">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openSubjectModal(id = null, name = '', code = '', coefficient = 1) {
+    document.getElementById('subject_id').value = id || '';
+    document.getElementById('subject_name').value = name || '';
+    document.getElementById('subject_code').value = code || '';
+    document.getElementById('subject_coefficient').value = coefficient || 1;
+    document.getElementById('subjectModalTitle').innerText = id ? 'Modifier la matière' : 'Nouvelle matière';
+
+    const modal = new bootstrap.Modal(document.getElementById('subjectModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

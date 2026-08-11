@@ -1,0 +1,108 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Gestion des Classes{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">Gestion des Classes</h2>
+        <p class="page-subtitle">Année {{ current_year }}</p>
+    </div>
+    <button class="btn btn-primary" onclick="openClassModal()">
+        <i class="bi bi-plus-lg me-1"></i> Nouvelle classe
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nom</th>
+                        <th>Niveau</th>
+                        <th>Capacité</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in classes %}
+                    <tr>
+                        <td class="fw-semibold">{{ c.name }}</td>
+                        <td><span class="badge bg-light text-dark">{{ c.level }}</span></td>
+                        <td>{{ c.capacity }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    onclick="openClassModal({{ c.id }}, '{{ c.name }}', {{ c.level.id }}, {{ c.capacity }})">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a href="{% url 'class_delete' c.id %}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Supprimer {{ c.name }} ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">Aucune classe</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Classe -->
+<div class="modal fade" id="classModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'class_save' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title" id="classModalTitle">Nouvelle classe</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="class_id" id="class_id">
+                    <div class="mb-3">
+                        <label class="form-label">Nom</label>
+                        <input type="text" name="name" id="class_name" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Niveau</label>
+                        <select name="level" id="class_level" class="form-select" required>
+                            <option value="">Choisir</option>
+                            {% for level in levels %}
+                                <option value="{{ level.id }}">{{ level.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacité</label>
+                        <input type="number" name="capacity" id="class_capacity" class="form-control" value="50">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openClassModal(id = null, name = '', levelId = '', capacity = 50) {
+    document.getElementById('class_id').value = id || '';
+    document.getElementById('class_name').value = name || '';
+    document.getElementById('class_level').value = levelId || '';
+    document.getElementById('class_capacity').value = capacity || 50;
+    document.getElementById('classModalTitle').innerText = id ? 'Modifier la classe' : 'Nouvelle classe';
+    new bootstrap.Modal(document.getElementById('classModal')).show();
+}
+</script>
+{% endblock %}

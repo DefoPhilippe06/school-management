@@ -1,0 +1,54 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Espace Enseignant{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title">Espace Enseignant</h2>
+    <p class="page-subtitle">Bienvenue, {{ user.get_full_name }}</p>
+</div>
+
+<div class="row g-4">
+    <!-- Saisie des notes -->
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body py-5">
+                <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-journal-text fs-2"></i>
+                </div>
+                <h5>Saisie des notes</h5>
+                <p class="text-muted small">Enregistrer les notes de séquence</p>
+                <a href="{% url 'grade_entry' %}" class="btn btn-primary btn-sm">Accéder</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Absences -->
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body py-5">
+                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-person-x fs-2"></i>
+                </div>
+                <h5>Absences</h5>
+                <p class="text-muted small">Noter les absences pendant le cours</p>
+                <a href="{% url 'attendance_entry' %}" class="btn btn-danger btn-sm">Accéder</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Emploi du temps -->
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body py-5">
+                <div class="bg-success bg-opacity-10 text-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-calendar3 fs-2"></i>
+                </div>
+                <h5>Emploi du temps</h5>
+                <p class="text-muted small">Consulter les emplois du temps</p>
+                <a href="{% url 'timetable' %}" class="btn btn-success btn-sm">Voir</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

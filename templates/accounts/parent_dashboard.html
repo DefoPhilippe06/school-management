@@ -1,0 +1,48 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Espace Parent{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h2 class="page-title">Espace Parent</h2>
+    <p class="page-subtitle">Bienvenue, {{ user.get_full_name }}</p>
+</div>
+
+{% if children %}
+<div class="row g-4">
+    {% for child in children %}
+    <div class="col-md-6 col-lg-4">
+        <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 50px; height: 50px;">
+                        <i class="bi bi-person-fill fs-4"></i>
+                    </div>
+                    <div>
+                        <h5 class="mb-0">{{ child.user.get_full_name }}</h5>
+                        <small class="text-muted">{{ child.matricule }}</small>
+                    </div>
+                </div>
+                <p class="mb-3">
+                    <span class="badge bg-light text-dark">{{ child.current_class|default:"Non affecté" }}</span>
+                </p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'student_grades' child.id %}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-journal-text me-1"></i> Voir le bulletin
+                    </a>
+                    <a href="{% url 'bulletin_pdf' child.id %}" class="btn btn-danger btn-sm" target="_blank">
+                        <i class="bi bi-file-earmark-pdf me-1"></i> Télécharger PDF
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info d-flex align-items-center">
+    <i class="bi bi-info-circle me-2 fs-4"></i>
+    Aucun enfant n’est lié à votre compte pour le moment.
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Inscription d'un élève{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="page-title">Inscription d'un élève</h2>
+                <p class="page-subtitle">Créer un nouveau dossier élève</p>
+            </div>
+            <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+                ← Retour
+            </a>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Informations personnelles -->
+                    <h5 class="text-primary mb-3">
+                        <i class="bi bi-person me-2"></i>Informations personnelles
+                    </h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nom</label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}<div class="text-danger small">{{ form.last_name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Prénom</label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}<div class="text-danger small">{{ form.first_name.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Matricule</label>
+                            {{ form.matricule }}
+                            {% if form.matricule.errors %}<div class="text-danger small">{{ form.matricule.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Sexe</label>
+                            {{ form.gender }}
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Date de naissance</label>
+                            {{ form.date_of_birth }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Lieu de naissance</label>
+                            {{ form.place_of_birth }}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Téléphone</label>
+                            {{ form.phone }}
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Adresse</label>
+                            {{ form.address }}
+                        </div>
+                    </div>
+
+                    <!-- Compte -->
+                    <h5 class="text-primary mb-3">
+                        <i class="bi bi-key me-2"></i>Compte de connexion
+                    </h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            {{ form.username }}
+                            {% if form.username.errors %}<div class="text-danger small">{{ form.username.errors }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email (optionnel)</label>
+                            {{ form.email }}
+                        </div>
+                    </div>
+
+                    <!-- Classe -->
+                    <h5 class="text-primary mb-3">
+                        <i class="bi bi-building me-2"></i>Classe
+                    </h5>
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Classe d'affectation</label>
+                            {{ form.classroom }}
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">Annuler</a>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i> Inscrire l'élève
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    input, select, textarea {
+        width: 100%;
+        padding: 0.55rem 0.85rem;
+        border: 1px solid #cbd5e1;
+        border-radius: 8px;
+    }
+    input:focus, select:focus, textarea:focus {
+        border-color: #3b82f6;
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+    }
+</style>
+{% endblock %}

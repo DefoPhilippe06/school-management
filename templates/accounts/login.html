@@ -1,0 +1,456 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* ============================================================
+       FOND AVEC PARTICULES ANIMÉES (SUBTLES)
+       ============================================================ */
+    body {
+        background: linear-gradient(145deg, #f6f9fc 0%, #eef2f7 100%);
+        min-height: 100vh;
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Particules flottantes (cercles flous) */
+    body::before,
+    body::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: 0.3;
+        z-index: 0;
+        pointer-events: none;
+        animation: floatParticle 20s infinite alternate ease-in-out;
+    }
+
+    body::before {
+        width: 500px;
+        height: 500px;
+        background: #6C63FF;
+        top: -150px;
+        right: -100px;
+        animation-delay: 0s;
+    }
+
+    body::after {
+        width: 400px;
+        height: 400px;
+        background: #FF6584;
+        bottom: -100px;
+        left: -100px;
+        animation-delay: -5s;
+    }
+
+    @keyframes floatParticle {
+        0% { transform: translate(0, 0) scale(1); }
+        33% { transform: translate(60px, -40px) scale(1.1); }
+        66% { transform: translate(-30px, 60px) scale(0.9); }
+        100% { transform: translate(40px, 30px) scale(1.05); }
+    }
+
+    /* ============================================================
+       CARTE MODERNE (GLASSMORPHISM LÉGER)
+       ============================================================ */
+    .card {
+        position: relative;
+        z-index: 1;
+        border: none !important;
+        border-radius: 24px !important;
+        background: rgba(255, 255, 255, 0.80) !important;
+        backdrop-filter: blur(20px) !important;
+        -webkit-backdrop-filter: blur(20px) !important;
+        box-shadow: 0 30px 80px rgba(0, 0, 0, 0.08),
+                    0 10px 30px rgba(0, 0, 0, 0.04) !important;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+                    box-shadow 0.3s ease !important;
+    }
+
+    .card:hover {
+        transform: translateY(-6px) !important;
+        box-shadow: 0 40px 100px rgba(0, 0, 0, 0.12),
+                    0 12px 36px rgba(0, 0, 0, 0.06) !important;
+    }
+
+    /* ============================================================
+       TITRE & ICÔNE
+       ============================================================ */
+    .card-body h3 {
+        font-weight: 700 !important;
+        color: #1a1a2e !important;
+        font-size: 1.8rem !important;
+        letter-spacing: -0.02em !important;
+    }
+
+    .card-body h3 i {
+        font-size: 2.8rem !important;
+        display: block !important;
+        margin-bottom: 12px !important;
+        background: linear-gradient(135deg, #6C63FF 0%, #3F3D9E 100%) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+        animation: iconPulse 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes iconPulse {
+        0% { transform: scale(1) rotate(0deg); }
+        100% { transform: scale(1.05) rotate(-2deg); }
+    }
+
+    /* ============================================================
+       LABELS MODERNES (UPPERCASE LÉGER)
+       ============================================================ */
+    .form-label {
+        font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        letter-spacing: 0.04em !important;
+        text-transform: uppercase !important;
+        color: #4a4a5a !important;
+        margin-bottom: 6px !important;
+    }
+
+    /* ============================================================
+       CHAMPS DE SAISIE
+       ============================================================ */
+    .form-control {
+        border: 2px solid #eef2f6 !important;
+        border-radius: 14px !important;
+        padding: 12px 18px !important;
+        font-size: 0.95rem !important;
+        background: #fafbfc !important;
+        transition: all 0.2s ease !important;
+        height: 52px !important;
+        color: #1a1a2e !important;
+    }
+
+    .form-control:focus {
+        border-color: #6C63FF !important;
+        background: #ffffff !important;
+        box-shadow: 0 0 0 6px rgba(108, 99, 255, 0.10) !important;
+        outline: none !important;
+    }
+
+    .form-control::placeholder {
+        color: #b0b8c5 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* ============================================================
+       CHECKBOX "SE SOUVENIR DE MOI" (TOGGLE MODERNE)
+       ============================================================ */
+    .form-check {
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+        cursor: pointer !important;
+    }
+
+    .form-check-input {
+        width: 44px !important;
+        height: 24px !important;
+        border-radius: 12px !important;
+        border: 2px solid #d0d7e2 !important;
+        background: #eef2f6 !important;
+        transition: all 0.25s ease !important;
+        cursor: pointer !important;
+        position: relative !important;
+        flex-shrink: 0 !important;
+        margin: 0 !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+    }
+
+    .form-check-input:checked {
+        background: #6C63FF !important;
+        border-color: #6C63FF !important;
+    }
+
+    .form-check-input:checked::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 2px !important;
+        right: 2px !important;
+        width: 16px !important;
+        height: 16px !important;
+        background: white !important;
+        border-radius: 50% !important;
+        transition: transform 0.25s ease !important;
+        transform: translateX(0px) !important;
+    }
+
+    .form-check-input::after {
+        content: '' !important;
+        position: absolute !important;
+        top: 2px !important;
+        left: 2px !important;
+        width: 16px !important;
+        height: 16px !important;
+        background: white !important;
+        border-radius: 50% !important;
+        transition: transform 0.25s ease !important;
+        transform: translateX(0px) !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+    }
+
+    .form-check-input:checked::after {
+        transform: translateX(20px) !important;
+    }
+
+    .form-check-label {
+        font-size: 0.9rem !important;
+        color: #4a4a5a !important;
+        font-weight: 500 !important;
+        cursor: pointer !important;
+        user-select: none !important;
+    }
+
+    /* ============================================================
+       BOUTON CONNEXION (DÉGRADÉ + OMBRE)
+       ============================================================ */
+    .btn-primary {
+        background: linear-gradient(135deg, #6C63FF 0%, #5A52D5 100%) !important;
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 14px !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        letter-spacing: 0.03em !important;
+        transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+        box-shadow: 0 8px 28px rgba(108, 99, 255, 0.30) !important;
+        height: 52px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 10px !important;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px) !important;
+        box-shadow: 0 14px 40px rgba(108, 99, 255, 0.40) !important;
+        background: linear-gradient(135deg, #7B73FF 0%, #5A52D5 100%) !important;
+    }
+
+    .btn-primary:active {
+        transform: scale(0.97) !important;
+        box-shadow: 0 4px 16px rgba(108, 99, 255, 0.20) !important;
+    }
+
+    /* ============================================================
+       LIEN "MOT DE PASSE OUBLIÉ ?"
+       ============================================================ */
+    .forgot-link {
+        color: #6C63FF !important;
+        text-decoration: none !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+        transition: all 0.2s ease !important;
+        border-bottom: 2px solid transparent !important;
+        padding-bottom: 2px !important;
+    }
+
+    .forgot-link:hover {
+        color: #4a42b3 !important;
+        border-bottom-color: #6C63FF !important;
+    }
+
+    /* ============================================================
+       MESSAGES D'ERREUR (ALERTES ÉLÉGANTES)
+       ============================================================ */
+    .alert {
+        border: none !important;
+        border-radius: 14px !important;
+        padding: 14px 20px !important;
+        font-weight: 500 !important;
+        font-size: 0.92rem !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 10px !important;
+    }
+
+    .alert-danger {
+        background: #fff5f5 !important;
+        color: #c0392b !important;
+        border-left: 4px solid #e74c3c !important;
+    }
+
+    .alert-success {
+        background: #f0faf4 !important;
+        color: #1a7a4a !important;
+        border-left: 4px solid #2ecc71 !important;
+    }
+
+    .alert i {
+        font-size: 1.3rem !important;
+    }
+
+    /* ============================================================
+       RESPONSIVE (MOBILE)
+       ============================================================ */
+    @media (max-width: 576px) {
+        .card {
+            border-radius: 20px !important;
+            margin: 0 16px !important;
+            background: rgba(255, 255, 255, 0.92) !important;
+        }
+
+        .form-control,
+        .btn-primary {
+            height: 48px !important;
+            font-size: 0.9rem !important;
+        }
+
+        .card-body h3 {
+            font-size: 1.5rem !important;
+        }
+
+        .card-body h3 i {
+            font-size: 2.2rem !important;
+        }
+
+        body::before,
+        body::after {
+            width: 250px !important;
+            height: 250px !important;
+            filter: blur(60px) !important;
+        }
+
+        body::before {
+            top: -80px !important;
+            right: -60px !important;
+        }
+
+        body::after {
+            bottom: -60px !important;
+            left: -60px !important;
+        }
+    }
+
+    /* ============================================================
+       ANIMATION D'APPARITION DE LA CARTE
+       ============================================================ */
+    .card {
+        animation: fadeSlideUp 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) both !important;
+    }
+
+    @keyframes fadeSlideUp {
+        0% {
+            opacity: 0;
+            transform: translateY(40px) scale(0.96);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    /* ============================================================
+       ESPACEMENTS ET MARGES (AJUSTEMENTS SUBTILS)
+       ============================================================ */
+    .mt-5 {
+        margin-top: 6rem !important;
+    }
+
+    .gap-3 {
+        gap: 1.25rem !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-5">
+        <div class="card shadow">
+            <div class="card-body p-4 p-md-5">
+                <h3 class="text-center mb-4">
+                    <i class="bi bi-mortarboard-fill"></i>
+                    Connexion
+                </h3>
+
+                <!-- =============================================
+                     AFFICHAGE DES MESSAGES DJANGO (SUCCÈS / ERREUR)
+                     ============================================= -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} mb-3" role="alert">
+                            <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% else %}exclamation-triangle-fill{% endif %}"></i>
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- =============================================
+                     FORMULAIRE (STRUCTURE INTACTE)
+                     ============================================= -->
+                <form method="post">
+                    {% csrf_token %}
+
+                    <!-- Champ Nom d'utilisateur -->
+                    <div class="mb-3">
+                        <label for="username" class="form-label">
+                            <i class="bi bi-person-fill me-1"></i> Nom d'utilisateur
+                        </label>
+                        <input type="text" 
+                               name="username" 
+                               id="username"
+                               class="form-control" 
+                               placeholder="ex: jean.dupont"
+                               required 
+                               autofocus>
+                    </div>
+
+                    <!-- Champ Mot de passe -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">
+                            <i class="bi bi-lock-fill me-1"></i> Mot de passe
+                        </label>
+                        <input type="password" 
+                               name="password" 
+                               id="password"
+                               class="form-control" 
+                               placeholder="••••••••"
+                               required>
+                    </div>
+
+                    <!-- =========================================
+                         LIGNE : CHECKBOX + LIEN MDP OUBLIÉ
+                         ========================================= -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="rememberMe" 
+                                   name="remember_me">
+                            <label class="form-check-label" for="rememberMe">
+                                Se souvenir de moi
+                            </label>
+                        </div>
+                        <a href="#" class="forgot-link">
+                            <i class="bi bi-key-fill me-1"></i> Mot de passe oublié ?
+                        </a>
+                    </div>
+
+                    <!-- Bouton de connexion -->
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-box-arrow-in-right"></i>
+                        Se connecter
+                    </button>
+                </form>
+
+                <!-- =========================================
+                     PIED DE PAGE (OPTIONNEL)
+                     ========================================= -->
+                <div class="text-center mt-4" style="font-size: 0.85rem; color: #8a8a9a;">
+                    Pas encore de compte ? 
+                    <a href="#" style="color: #6C63FF; text-decoration: none; font-weight: 600;">
+                        Créer un compte
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,241 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Liste des élèves{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <div>
+        <h2 class="page-title">Liste des élèves</h2>
+        <p class="page-subtitle">Gestion des inscriptions</p>
+    </div>
+    <div class="d-flex gap-2">
+        <!-- Bouton Import -->
+        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#importModal">
+            <i class="bi bi-upload me-1"></i> Importer
+        </button>
+        <!-- Bouton Nouvel élève -->
+        <a href="{% url 'student_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Nouvel élève
+        </a>
+    </div>
+</div>
+
+<!-- Filtres -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3 align-items-end">
+            <div class="col-md-5">
+                <label class="form-label small text-muted">Recherche</label>
+                <input type="text" name="q" class="form-control" placeholder="Matricule, nom, prénom..." value="{{ query }}">
+            </div>
+            <div class="col-md-4">
+                <label class="form-label small text-muted">Classe</label>
+                <select name="class" class="form-select">
+                    <option value="">Toutes les classes</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class == c.id|stringformat:"s" %}selected{% endif %}>
+                            {{ c.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-outline-primary w-100">
+                    <i class="bi bi-funnel me-1"></i> Filtrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Tableau -->
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Matricule</th>
+                        <th>Nom & Prénom</th>
+                        <th>Classe</th>
+                        <th>Sexe</th>
+                        <th>Date de naissance</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student in students %}
+                    <tr>
+                        <td><span class="fw-semibold text-primary">{{ student.matricule }}</span></td>
+                        <td>{{ student.user.get_full_name }}</td>
+                        <td>
+                            {% if student.current_class %}
+                                <span class="badge bg-light text-dark">{{ student.current_class.name }}</span>
+                            {% else %}—{% endif %}
+                        </td>
+                        <td>{{ student.get_gender_display }}</td>
+                        <td>{{ student.date_of_birth|date:"d/m/Y" }}</td>
+                        <td class="text-end">
+                            <a href="{% url 'student_grades' student.id %}" class="btn btn-sm btn-outline-info me-1" title="Notes">
+                                <i class="bi bi-journal-text"></i>
+                            </a>
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    onclick="openStudentModal(
+                                        {{ student.id }},
+                                        '{{ student.user.first_name }}',
+                                        '{{ student.user.last_name }}',
+                                        '{{ student.matricule }}',
+                                        '{{ student.gender }}',
+                                        '{{ student.date_of_birth|date:"Y-m-d" }}',
+                                        '{{ student.place_of_birth|default:"" }}',
+                                        '{{ student.phone|default:"" }}',
+                                        '{{ student.address|default:"" }}',
+                                        {{ student.current_class.id|default:"null" }}
+                                    )">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <a href="{% url 'student_delete' student.id %}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Supprimer {{ student.user.get_full_name }} ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-5">
+                            <i class="bi bi-inbox fs-1 d-block mb-2"></i>
+                            Aucun élève trouvé
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Modification Élève -->
+<div class="modal fade" id="studentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'student_save' %}">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier l'élève</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="student_id" id="student_id">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" name="first_name" id="student_first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nom</label>
+                            <input type="text" name="last_name" id="student_last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Matricule</label>
+                            <input type="text" name="matricule" id="student_matricule" class="form-control" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Sexe</label>
+                            <select name="gender" id="student_gender" class="form-select">
+                                <option value="M">Masculin</option>
+                                <option value="F">Féminin</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Date de naissance</label>
+                            <input type="date" name="date_of_birth" id="student_dob" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Lieu de naissance</label>
+                            <input type="text" name="place_of_birth" id="student_place" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Téléphone</label>
+                            <input type="text" name="phone" id="student_phone" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Adresse</label>
+                            <textarea name="address" id="student_address" class="form-control" rows="2"></textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Classe</label>
+                            <select name="classroom" id="student_classroom" class="form-select">
+                                <option value="">—</option>
+                                {% for c in classes %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<!-- Modal Import Excel/CSV -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'student_import' %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-upload me-2"></i>Importer des élèves
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info small">
+                        <strong>Format attendu :</strong> fichier Excel (.xlsx) ou CSV.<br>
+                        Colonnes recommandées : <code>nom</code>, <code>prenom</code>, <code>matricule</code>, 
+                        <code>sexe</code>, <code>date_naissance</code>, <code>classe</code>, 
+                        <code>lieu_naissance</code>, <code>telephone</code>, <code>adresse</code>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Fichier Excel / CSV</label>
+                        <input type="file" name="file" class="form-control" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <p class="text-muted small mb-0">
+                        L’import se fait en arrière-plan. Vous recevrez un email de confirmation une fois terminé.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-success">
+                        <i class="bi bi-upload me-1"></i> Lancer l’import
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openStudentModal(id, first, last, matricule, gender, dob, place, phone, address, classId) {
+    document.getElementById('student_id').value = id;
+    document.getElementById('student_first_name').value = first || '';
+    document.getElementById('student_last_name').value = last || '';
+    document.getElementById('student_matricule').value = matricule || '';
+    document.getElementById('student_gender').value = gender || 'M';
+    document.getElementById('student_dob').value = dob || '';
+    document.getElementById('student_place').value = place || '';
+    document.getElementById('student_phone').value = phone || '';
+    document.getElementById('student_address').value = address || '';
+    document.getElementById('student_classroom').value = classId || '';
+
+    new bootstrap.Modal(document.getElementById('studentModal')).show();
+}
+</script>
+{% endblock %}
