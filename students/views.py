@@ -118,27 +118,42 @@ def student_import(request):
             messages.error(request, "Aucun fichier sélectionné.")
             return redirect('student_list')
 
-        # Vérifier l'extension
         allowed_extensions = ['.xlsx', '.xls', '.csv']
         if not any(uploaded_file.name.lower().endswith(ext) for ext in allowed_extensions):
             messages.error(request, "Format non supporté. Utilisez un fichier .xlsx, .xls ou .csv")
             return redirect('student_list')
 
-        # Lire le contenu du fichier en mémoire
         file_content = uploaded_file.read()
+        admin_email = request.user.email or 'dphilippejunior@gmail.com'
 
-        # Lancer la tâche Celery en arrière-plan
-        import_students_task.delay(
-            file_content=file_content,
-            filename=uploaded_file.name,
-            admin_email=request.user.email or 'dphilippejunior@gmail.com',
-            admin_id=request.user.id
-        )
+        try:
+            # Essayer Celery (arrière-plan)
+            from .tasks import import_students_task
+            import_students_task.delay(
+                file_content=file_content,
+                filename=uploaded_file.name,
+                admin_email=admin_email,
+                admin_id=request.user.id
+            )
+            messages.success(
+                request,
+                "Import lancé en arrière-plan. Vous recevrez un email une fois terminé."
+            )
+        except Exception:
+            # Fallback : exécution synchrone si Celery/Redis indisponible
+            from .tasks import import_students_task
+            result = import_students_task(
+                file_content=file_content,
+                filename=uploaded_file.name,
+                admin_email=admin_email,
+                admin_id=request.user.id
+            )
+            messages.success(
+                request,
+                f"Import terminé : {result.get('success', 0)} réussis, {result.get('errors', 0)} échecs. "
+                f"Un email de confirmation a été envoyé."
+            )
 
-        messages.success(
-            request,
-            "Import lancé en arrière-plan. Vous recevrez un email dès que le traitement sera terminé."
-        )
         return redirect('student_list')
 
     return redirect('student_list')
