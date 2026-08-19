@@ -129,13 +129,12 @@ def student_import(request):
         from .tasks import import_students_task
 
         try:
-            # Mode synchrone explicite (compatible Render free)
             result = import_students_task.run(
                 file_content=file_content,
                 filename=uploaded_file.name,
                 admin_email=admin_email,
                 admin_id=request.user.id
-            )
+            ) or {}
             messages.success(
                 request,
                 f"Import terminé : {result.get('success', 0)} réussis, "
