@@ -51,7 +51,7 @@ INSTALLED_APPS = [
     'core',
 ]
 # ======================
-# CLOUDINARY (photos de profil)
+# CLOUDINARY (photos)
 # ======================
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
@@ -65,6 +65,7 @@ if os.environ.get('USE_CLOUDINARY', 'False') == 'True':
         'cloudinary',
     ]
     DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+    MEDIA_URL = '/media/'  # conservé, Cloudinary gère l'URL réelle
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
