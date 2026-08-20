@@ -75,6 +75,14 @@ def grade_save(request):
                             'created_by': request.user
                         }
                     )
+        from accounts.utils import notify_admins
+        if request.user.role == 'TEACHER':
+            notify_admins(
+                f"📝 {request.user.get_full_name() or request.user.username} a saisi des notes "
+                f"(séquence {sequence}).",
+                link='/grades/',
+                exclude_user=request.user,
+            )
 
         messages.success(request, "Notes enregistrées avec succès.")
         return redirect(f"/grades/?class={class_id}&subject={subject_id}&sequence={sequence}")
