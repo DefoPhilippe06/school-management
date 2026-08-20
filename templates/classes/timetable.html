@@ -6,8 +6,13 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h2 class="page-title">Emploi du temps</h2>
-        <p class="page-subtitle">Consultation des emplois du temps par classe</p>
+        <p class="page-subtitle">Gestion des créneaux par classe</p>
     </div>
+    {% if is_admin and selected_class %}
+    <button class="btn btn-primary" onclick="openSlotModal()">
+        <i class="bi bi-plus-lg me-1"></i> Nouveau créneau
+    </button>
+    {% endif %}
 </div>
 
 <div class="card mb-4">
@@ -45,17 +50,40 @@
                                 {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
                             </div>
                             <div>{{ slot.subject.name }}</div>
-                            <small class="text-muted">{{ slot.teacher|default:"Enseignant non assigné" }}</small>
+                            <small class="text-muted">
+                                {% if slot.teacher %}{{ slot.teacher.user.get_full_name }}{% else %}Non assigné{% endif %}
+                            </small>
                         </div>
-                        {% if slot.room %}
-                        <span class="badge bg-light text-dark">{{ slot.room }}</span>
-                        {% endif %}
+                        <div class="d-flex flex-column align-items-end gap-1">
+                            {% if slot.room %}
+                            <span class="badge bg-light text-dark">{{ slot.room }}</span>
+                            {% endif %}
+                            {% if is_admin %}
+                            <div>
+                                <button type="button" class="btn btn-sm btn-outline-primary"
+                                    onclick="openSlotModal(
+                                        {{ slot.id }},
+                                        '{{ slot.day }}',
+                                        '{{ slot.start_time|time:'H:i' }}',
+                                        '{{ slot.end_time|time:'H:i' }}',
+                                        {{ slot.subject_id }},
+                                        {% if slot.teacher_id %}{{ slot.teacher_id }}{% else %}''{% endif %},
+                                        '{{ slot.room|escapejs }}'
+                                    )">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <a href="{% url 'timeslot_delete' slot.id %}"
+                                   class="btn btn-sm btn-outline-danger"
+                                   onclick="return confirm('Supprimer ce créneau ?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
                     </div>
                 </li>
                 {% empty %}
-                <li class="list-group-item text-muted text-center py-4">
-                    Aucun cours
-                </li>
+                <li class="list-group-item text-muted text-center py-4">Aucun cours</li>
                 {% endfor %}
             </ul>
         </div>
@@ -65,7 +93,88 @@
 {% else %}
 <div class="alert alert-info d-flex align-items-center">
     <i class="bi bi-info-circle me-2 fs-5"></i>
-    Sélectionnez une classe pour afficher son emploi du temps.
+    Sélectionnez une classe pour afficher / gérer son emploi du temps.
 </div>
 {% endif %}
+
+{% if is_admin %}
+<!-- Modal Créneau -->
+<div class="modal fade" id="slotModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'timeslot_save' %}">
+                {% csrf_token %}
+                <input type="hidden" name="slot_id" id="slot_id">
+                <input type="hidden" name="classroom" value="{{ selected_class }}">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="slotModalTitle">Nouveau créneau</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Jour</label>
+                        <select name="day" id="slot_day" class="form-select" required>
+                            {% for d in days %}
+                            <option value="{{ d }}">{{ d|title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col">
+                            <label class="form-label">Début</label>
+                            <input type="time" name="start_time" id="slot_start" class="form-control" required>
+                        </div>
+                        <div class="col">
+                            <label class="form-label">Fin</label>
+                            <input type="time" name="end_time" id="slot_end" class="form-control" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Matière</label>
+                        <select name="subject" id="slot_subject" class="form-select" required>
+                            <option value="">Choisir</option>
+                            {% for s in subjects %}
+                            <option value="{{ s.id }}">{{ s.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Enseignant</label>
+                        <select name="teacher" id="slot_teacher" class="form-select">
+                            <option value="">Non assigné</option>
+                            {% for t in teachers %}
+                            <option value="{{ t.id }}">{{ t.user.get_full_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Salle</label>
+                        <input type="text" name="room" id="slot_room" class="form-control" placeholder="Ex: Salle A1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openSlotModal(id, day, start, end, subjectId, teacherId, room) {
+    document.getElementById('slot_id').value = id || '';
+    document.getElementById('slot_day').value = day || 'LUNDI';
+    document.getElementById('slot_start').value = start || '';
+    document.getElementById('slot_end').value = end || '';
+    document.getElementById('slot_subject').value = subjectId || '';
+    document.getElementById('slot_teacher').value = teacherId || '';
+    document.getElementById('slot_room').value = room || '';
+    document.getElementById('slotModalTitle').innerText = id ? 'Modifier le créneau' : 'Nouveau créneau';
+    new bootstrap.Modal(document.getElementById('slotModal')).show();
+}
+</script>
 {% endblock %}

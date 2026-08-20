@@ -5,6 +5,7 @@ from accounts.decorators import role_required
 from .models import ClassRoom, Level, TimeSlot
 from core.models import SchoolYear
 from subjects.models import Subject
+from django.urls import reverse
 
 
 @login_required
@@ -15,9 +16,10 @@ def timetable_view(request):
     selected_class = request.GET.get('class')
     timeslots = []
     if selected_class:
-        timeslots = TimeSlot.objects.filter(classroom_id=selected_class).select_related('subject', 'teacher')
+        timeslots = TimeSlot.objects.filter(classroom_id=selected_class).select_related(
+            'subject', 'teacher', 'teacher__user'
+        )
 
-    # Organiser par jour
     days = ['LUNDI', 'MARDI', 'MERCREDI', 'JEUDI', 'VENDREDI', 'SAMEDI']
     timetable = {day: [] for day in days}
     for slot in timeslots:
@@ -28,6 +30,9 @@ def timetable_view(request):
         'selected_class': selected_class,
         'timetable': timetable,
         'days': days,
+        'subjects': Subject.objects.all(),
+        'teachers': Teacher.objects.select_related('user').all(),
+        'is_admin': request.user.role == 'ADMIN' or request.user.is_superuser,
     }
     return render(request, 'classes/timetable.html', context)
 
@@ -132,3 +137,55 @@ def class_list(request):
 def level_list(request):
     levels = Level.objects.all().order_by('order')
     return render(request, 'classes/level_list.html', {'levels': levels})
+
+from teachers.models import Teacher
+
+
+@login_required
+@role_required('ADMIN')
+def timeslot_save(request):
+    if request.method == 'POST':
+        slot_id = request.POST.get('slot_id')
+        classroom_id = request.POST.get('classroom')
+        subject_id = request.POST.get('subject')
+        teacher_id = request.POST.get('teacher') or None
+        day = request.POST.get('day')
+        start_time = request.POST.get('start_time')
+        end_time = request.POST.get('end_time')
+        room = request.POST.get('room', '').strip()
+
+        if slot_id:
+            slot = get_object_or_404(TimeSlot, id=slot_id)
+            slot.classroom_id = classroom_id
+            slot.subject_id = subject_id
+            slot.teacher_id = teacher_id
+            slot.day = day
+            slot.start_time = start_time
+            slot.end_time = end_time
+            slot.room = room
+            slot.save()
+            messages.success(request, "Créneau modifié.")
+        else:
+            TimeSlot.objects.create(
+                classroom_id=classroom_id,
+                subject_id=subject_id,
+                teacher_id=teacher_id,
+                day=day,
+                start_time=start_time,
+                end_time=end_time,
+                room=room,
+            )
+            messages.success(request, "Créneau ajouté.")
+
+    selected = request.POST.get('classroom') or request.GET.get('class', '')
+    return redirect(f"{reverse('timetable')}?class={selected}" if selected else 'timetable')
+
+
+@login_required
+@role_required('ADMIN')
+def timeslot_delete(request, pk):
+    slot = get_object_or_404(TimeSlot, pk=pk)
+    classroom_id = slot.classroom_id
+    slot.delete()
+    messages.success(request, "Créneau supprimé.")
+    return redirect(f"{reverse('timetable')}?class={classroom_id}")

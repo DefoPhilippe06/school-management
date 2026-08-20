@@ -9,4 +9,6 @@ urlpatterns = [
     path('level/delete/<int:pk>/', views.level_delete, name='level_delete'),
     path('', views.class_list, name='class_list'),
     path('niveaux/', views.level_list, name='level_list'),
+    path('timeslot/save/', views.timeslot_save, name='timeslot_save'),
+    path('timeslot/delete/<int:pk>/', views.timeslot_delete, name='timeslot_delete'),
 ]
