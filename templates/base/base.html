@@ -1,10 +1,10 @@
-{% load static %}
+{% load static i18n %}
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}School Management{% endblock %}</title>
+    <title>{% block title %}{% trans "School Management" %}{% endblock %}</title>
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -34,19 +34,19 @@
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'dashboard' %}">
-                            <i class="bi bi-speedometer2 me-1"></i> Tableau de bord
+                            <i class="bi bi-speedometer2 me-1"></i> {% trans "Tableau de bord" %}
                         </a>
                     </li>
 
                     {% if user.role == 'ADMIN' or user.is_superuser %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'student_list' %}">
-                            <i class="bi bi-people me-1"></i> Élèves
+                            <i class="bi bi-people me-1"></i> {% trans "Élèves" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'grade_entry' %}">
-                            <i class="bi bi-journal-text me-1"></i> Notes
+                            <i class="bi bi-journal-text me-1"></i> {% trans "Notes" %}
                         </a>
                     </li>
                     <li class="nav-item">
@@ -56,22 +56,22 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'attendance_entry' %}">
-                            <i class="bi bi-person-x me-1"></i> Absences
+                            <i class="bi bi-person-x me-1"></i> {% trans "Absences" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'attendance_list' %}">
-                            <i class="bi bi-list-check me-1"></i> Gestion absences
+                            <i class="bi bi-list-check me-1"></i> {% trans "Gestion absences" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'subject_list' %}">
-                            <i class="bi bi-book me-1"></i> Matières
+                            <i class="bi bi-book me-1"></i> {% trans "Matières" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="/admin/">
-                            <i class="bi bi-gear me-1"></i> Admin
+                            <i class="bi bi-gear me-1"></i> {% trans "Admin" %}
                         </a>
                     </li>
                     {% endif %}
@@ -79,17 +79,17 @@
                     {% if user.role == 'TEACHER' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'teacher_dashboard' %}">
-                            <i class="bi bi-person-workspace me-1"></i> Espace Enseignant
+                            <i class="bi bi-person-workspace me-1"></i> {% trans "Espace Enseignant" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'grade_entry' %}">
-                            <i class="bi bi-journal-text me-1"></i> Saisie notes
+                            <i class="bi bi-journal-text me-1"></i> {% trans "Saisie notes" %}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'attendance_entry' %}">
-                            <i class="bi bi-person-x me-1"></i> Absences
+                            <i class="bi bi-person-x me-1"></i> {% trans "Absences" %}
                         </a>
                     </li>
                     {% endif %}
@@ -97,12 +97,42 @@
                     {% if user.role == 'PARENT' %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'parent_dashboard' %}">
-                            <i class="bi bi-house-heart me-1"></i> Espace Parent
+                            <i class="bi bi-house-heart me-1"></i> {% trans "Espace Parent" %}
                         </a>
                     </li>
                     {% endif %}
                 </ul>
                 {% endif %}
+
+                <!-- Langue -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
+                        <i class="bi bi-translate me-1"></i>
+                        {% if LANGUAGE_CODE == 'en' %}EN{% else %}FR{% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <input type="hidden" name="language" value="fr">
+                                <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'fr' %}active{% endif %}">
+                                    🇫🇷 Français
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <form action="{% url 'set_language' %}" method="post" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                                <input type="hidden" name="language" value="en">
+                                <button type="submit" class="dropdown-item {% if LANGUAGE_CODE == 'en' %}active{% endif %}">
+                                    🇬🇧 English
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </li>
 
                 <ul class="navbar-nav ms-auto">
                 {% if user.is_authenticated %}
@@ -118,9 +148,9 @@
                     </a>
                     <ul class="dropdown-menu dropdown-menu-end shadow" style="width: 320px; max-height: 400px; overflow-y: auto;">
                         <li class="dropdown-header d-flex justify-content-between align-items-center">
-                            <span class="fw-semibold">Notifications</span>
+                            <span class="fw-semibold">{% trans "Notifications" %}</span>
                             {% if unread_count > 0 %}
-                                <a href="{% url 'mark_all_notifications_read' %}" class="small text-primary">Tout marquer comme lu</a>
+                                <a href="{% url 'mark_all_notifications_read' %}" class="small text-primary">{% trans "Tout marquer comme lu" %}</a>
                             {% endif %}
                         </li>
                         <li><hr class="dropdown-divider"></li>
@@ -132,7 +162,7 @@
                                 </a>
                             </li>
                         {% empty %}
-                            <li><span class="dropdown-item text-muted small">Aucune nouvelle notification</span></li>
+                            <li><span class="dropdown-item text-muted small">{% trans "Aucune nouvelle notification" %}</span></li>
                         {% endfor %}
                     </ul>
                 </li>
@@ -154,14 +184,14 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow">
                         <li>
                             <a class="dropdown-item text-danger" href="{% url 'logout' %}">
-                                <i class="bi bi-box-arrow-right me-2"></i> Déconnexion
+                                <i class="bi bi-box-arrow-right me-2"></i> {% trans "Déconnexion" %}
                             </a>
                         </li>
                     </ul>
                 </li>
                 {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Connexion</a>
+                    <a class="nav-link" href="{% url 'login' %}">{% trans "Connexion" %}</a>
                 </li>
                 {% endif %}
                 </ul>
@@ -186,48 +216,126 @@
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Footer moderne -->
-    <footer class="mt-auto">
-        <div class="container-fluid px-4">
-            <div class="row g-4">
-                <div class="col-md-4">
-                    <h6><i class="bi bi-mortarboard-fill me-2"></i>School Management</h6>
-                    <p class="mb-2">
-                        Système de gestion d’établissement scolaire conçu pour les collèges et lycées du Cameroun.
+    <!-- Footer Moderne - Design Expert -->
+    <footer class="site-footer">
+        <div class="container-fluid px-4 py-5">
+            <div class="row g-5">
+                <!-- Colonne 1 - Brand & Description -->
+                <div class="col-lg-4 col-md-6">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="footer-brand-icon">
+                            <i class="bi bi-mortarboard-fill"></i>
+                        </div>
+                        <div>
+                            <h5 class="text-white fw-bold mb-0">School<span class="text-primary"> Management</span></h5>
+                            <span class="footer-badge">v1.0</span>
+                        </div>
+                    </div>
+                    <p class="footer-text mb-3">
+                        {% trans "Système de gestion d’établissement scolaire conçu pour les collèges et lycées du Cameroun." %}
                     </p>
-                    <p class="mb-0 small">
-                        Gestion des élèves, notes, absences, emplois du temps et bulletins.
+                    <p class="footer-text small opacity-75">
+                        {% trans "Gestion des élèves, notes, absences, emplois du temps et bulletins." %}
                     </p>
+                    <div class="mt-3 d-flex gap-2">
+                        <span class="footer-badge bg-primary bg-opacity-20 border-primary border-opacity-25">
+                            <i class="bi bi-check-circle-fill text-primary me-1"></i>Django
+                        </span>
+                        <span class="footer-badge bg-success bg-opacity-20 border-success border-opacity-25">
+                            <i class="bi bi-check-circle-fill text-success me-1"></i>Bootstrap
+                        </span>
+                    </div>
                 </div>
-                <div class="col-md-3">
-                    <h6>Navigation</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-1"><a href="{% url 'dashboard' %}">Tableau de bord</a></li>
-                        <li class="mb-1"><a href="{% url 'student_list' %}">Élèves</a></li>
-                        <li class="mb-1"><a href="{% url 'grade_entry' %}">Notes</a></li>
-                        <li class="mb-1"><a href="{% url 'attendance_list' %}">Absences</a></li>
-                        <li class="mb-1"><a href="{% url 'timetable' %}">Emploi du temps</a></li>
+
+                <!-- Colonne 2 - Navigation -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="footer-title">
+                        <i class="bi bi-compass me-2"></i>{% trans "Navigation" %}
+                    </h6>
+                    <ul class="list-unstyled footer-links">
+                        <li><a href="{% url 'dashboard' %}"><i class="bi bi-grid-1x2-fill me-2 opacity-50"></i>{% trans "Tableau de bord" %}</a></li>
+                        <li><a href="{% url 'student_list' %}"><i class="bi bi-people-fill me-2 opacity-50"></i>{% trans "Élèves" %}</a></li>
+                        <li><a href="{% url 'grade_entry' %}"><i class="bi bi-pencil-square me-2 opacity-50"></i>{% trans "Notes" %}</a></li>
+                        <li><a href="{% url 'attendance_list' %}"><i class="bi bi-calendar-x-fill me-2 opacity-50"></i>{% trans "Absences" %}</a></li>
+                        <li><a href="{% url 'timetable' %}"><i class="bi bi-clock-fill me-2 opacity-50"></i>{% trans "Emploi du temps" %}</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h6>Informations</h6>
-                    <ul class="list-unstyled">
-                        <li class="mb-1"><i class="bi bi-geo-alt me-2"></i>Cameroun</li>
-                        <li class="mb-1"><i class="bi bi-envelope me-2"></i>dphilippejunior@gmail.com</li>
-                        <li class="mb-1"><i class="bi bi-telephone me-2"></i>+237 656 857933</li>
+
+                <!-- Colonne 3 - Informations -->
+                <div class="col-lg-3 col-md-6">
+                    <h6 class="footer-title">
+                        <i class="bi bi-info-circle me-2"></i>{% trans "Informations" %}
+                    </h6>
+                    <ul class="list-unstyled footer-contact">
+                        <li>
+                            <i class="bi bi-geo-alt-fill"></i>
+                            <span>{% trans "Cameroun" %}</span>
+                        </li>
+                        <li>
+                            <i class="bi bi-envelope-fill"></i>
+                            <a href="mailto:dphilippejunior@gmail.com" class="text-decoration-none text-light-emphasis hover-text-primary">dphilippejunior@gmail.com</a>
+                        </li>
+                        <li>
+                            <i class="bi bi-telephone-fill"></i>
+                            <a href="tel:+237656857933" class="text-decoration-none text-light-emphasis hover-text-primary">+237 656 857933</a>
+                        </li>
+                        <li class="mt-2">
+                            <i class="bi bi-globe2"></i>
+                            <span class="footer-badge bg-info bg-opacity-10 border-info border-opacity-25">
+                                <i class="bi bi-clock me-1"></i>GMT+1
+                            </span>
+                        </li>
                     </ul>
                 </div>
-                <div class="col-md-2">
-                    <h6>Année scolaire</h6>
-                    <p class="mb-0">2025 - 2026</p>
-                    <p class="small mt-2">Version 1.0</p>
+
+                <!-- Colonne 4 - Année & Stats -->
+                <div class="col-lg-2 col-md-6">
+                    <h6 class="footer-title">
+                        <i class="bi bi-calendar3 me-2"></i>{% trans "Année scolaire" %}
+                    </h6>
+                    <div class="footer-year-display">
+                        <span class="d-block display-6 fw-bold text-white">2025</span>
+                        <span class="d-block text-primary fw-bold" style="font-size: 1.1rem;">— 2026</span>
+                    </div>
+                    <div class="mt-3 pt-2 border-top border-light border-opacity-10">
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-secondary">{% trans "Élèves" %}</span>
+                            <span class="text-white fw-bold">11</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-secondary">{% trans "Enseignants" %}</span>
+                            <span class="text-white fw-bold">2</span>
+                        </div>
+                        <div class="d-flex justify-content-between small">
+                            <span class="text-secondary">{% trans "Classes" %}</span>
+                            <span class="text-white fw-bold">19</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="footer-bottom text-center">
-                <span>© 2026 — Système de Gestion d’Établissement Scolaire — Cameroun</span>
-                <span class="mx-2">|</span>
-                <span>Développé avec Django</span>
+            <!-- Bottom Bar -->
+            <div class="footer-bottom mt-5 pt-3">
+                <div class="row align-items-center">
+                    <div class="col-md-6 text-center text-md-start">
+                        <span>© 2026 — <strong class="text-white">{% trans "School Management" %}</strong></span>
+                        <span class="mx-2 opacity-50">|</span>
+                        <span>{% trans "Système de Gestion d’Établissement Scolaire" %}</span>
+                        <span class="mx-2 opacity-50">|</span>
+                        <span class="text-secondary">{% trans "Cameroun" %}</span>
+                    </div>
+                    <div class="col-md-6 text-center text-md-end">
+                        <span class="text-secondary">
+                            <i class="bi bi-code-slash me-1"></i>
+                            {% trans "Développé avec" %}
+                            <span class="text-white fw-bold">Django</span>
+                        </span>
+                        <span class="mx-2 opacity-25">•</span>
+                        <a href="#" class="text-secondary text-decoration-none hover-text-primary">
+                            <i class="bi bi-arrow-up-circle-fill"></i>
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </footer>

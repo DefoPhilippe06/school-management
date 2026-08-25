@@ -23,4 +23,12 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)    
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+from django.conf.urls.i18n import i18n_patterns
+from django.urls import path, include
+
+# garde tes urls actuelles, et ajoute :
+urlpatterns += [
+    path('i18n/', include('django.conf.urls.i18n')),
+]    
