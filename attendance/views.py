@@ -75,7 +75,14 @@ def attendance_save(request):
                     status=status,
                     recorded_by=request.user
                 )
-
+        from accounts.utils import notify_admins
+        if request.user.role == 'TEACHER':
+            notify_admins(
+                f"📋 {request.user.get_full_name() or request.user.username} a enregistré des absences "
+                f"({attendance_date}).",
+                link='/attendance/',
+                exclude_user=request.user,
+            )
         messages.success(request, "Absences enregistrées avec succès.")
         return redirect(f"/attendance/?class={class_id}&subject={subject_id}&date={attendance_date}")
 

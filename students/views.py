@@ -120,39 +120,28 @@ def student_import(request):
 
         allowed_extensions = ['.xlsx', '.xls', '.csv']
         if not any(uploaded_file.name.lower().endswith(ext) for ext in allowed_extensions):
-            messages.error(request, "Format non supporté. Utilisez un fichier .xlsx, .xls ou .csv")
+            messages.error(request, "Format non supporté. Utilisez .xlsx, .xls ou .csv")
             return redirect('student_list')
 
         file_content = uploaded_file.read()
         admin_email = request.user.email or 'dphilippejunior@gmail.com'
 
+        from .tasks import import_students_task
+
         try:
-            # Essayer Celery (arrière-plan)
-            from .tasks import import_students_task
-            import_students_task.delay(
+            result = import_students_task.run(
                 file_content=file_content,
                 filename=uploaded_file.name,
                 admin_email=admin_email,
                 admin_id=request.user.id
-            )
+            ) or {}
             messages.success(
                 request,
-                "Import lancé en arrière-plan. Vous recevrez un email une fois terminé."
+                f"Import terminé : {result.get('success', 0)} réussis, "
+                f"{result.get('errors', 0)} échecs. Un email a été envoyé à {admin_email}."
             )
-        except Exception:
-            # Fallback : exécution synchrone si Celery/Redis indisponible
-            from .tasks import import_students_task
-            result = import_students_task(
-                file_content=file_content,
-                filename=uploaded_file.name,
-                admin_email=admin_email,
-                admin_id=request.user.id
-            )
-            messages.success(
-                request,
-                f"Import terminé : {result.get('success', 0)} réussis, {result.get('errors', 0)} échecs. "
-                f"Un email de confirmation a été envoyé."
-            )
+        except Exception as e:
+            messages.error(request, f"Erreur pendant l'import / email : {str(e)}")
 
         return redirect('student_list')
 

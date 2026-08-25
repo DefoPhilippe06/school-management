@@ -162,39 +162,305 @@ main.container-fluid {
     font-size: 0.95rem;
 }
 
-/* ========== FOOTER MODERNE ========== */
-footer {
-    background: linear-gradient(135deg, #0f172a, #1e293b);
-    color: #94a3b8;
-    font-size: 0.9rem;
-    padding: 2.5rem 0 1.5rem;
-    margin-top: auto;
+/* ============================================
+   FOOTER - DESIGN EXPERT
+   ============================================ */
+
+/* --- Variables --- */
+:root {
+    --footer-bg-start: #0b1120;
+    --footer-bg-end: #1a365d;
+    --footer-text: #94a3b8;
+    --footer-text-light: #e2e8f0;
+    --footer-border: rgba(255, 255, 255, 0.08);
+    --footer-accent: #60a5fa;
+    --footer-accent-dark: #3b82f6;
 }
 
-footer h6 {
-    color: #f1f5f9;
+/* --- Structure principale --- */
+.site-footer {
+    background: linear-gradient(160deg, var(--footer-bg-start) 0%, var(--footer-bg-end) 100%);
+    color: var(--footer-text-light);
+    margin-top: 4rem;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet de brillance subtil en haut */
+.site-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--footer-accent), transparent);
+    opacity: 0.4;
+}
+
+/* Effet de grille subtil en fond */
+.site-footer::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+}
+
+/* --- Brand / Logo --- */
+.footer-brand-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(59, 130, 246, 0.1));
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    color: var(--footer-accent);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.footer-brand-icon:hover {
+    transform: scale(1.05) rotate(-3deg);
+    box-shadow: 0 0 30px rgba(96, 165, 250, 0.2);
+}
+
+/* --- Titres --- */
+.footer-title {
+    color: #fff;
     font-weight: 600;
-    margin-bottom: 1rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 2px solid var(--footer-border);
+    position: relative;
+}
+
+.footer-title::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: var(--footer-accent);
+    border-radius: 2px;
+}
+
+.footer-title i {
+    color: var(--footer-accent);
+}
+
+/* --- Texte --- */
+.footer-text {
+    color: var(--footer-text);
     font-size: 0.95rem;
+    line-height: 1.7;
 }
 
-footer a {
-    color: #94a3b8;
-    text-decoration: none;
-    transition: color 0.2s;
-}
-
-footer a:hover {
-    color: #3b82f6;
-}
-
-footer .footer-bottom {
-    border-top: 1px solid #334155;
-    margin-top: 2rem;
-    padding-top: 1.2rem;
-    font-size: 0.85rem;
-}
-
-footer .list-unstyled li {
+/* --- Liens de navigation --- */
+.footer-links li {
     margin-bottom: 0.4rem;
 }
+
+.footer-links a {
+    color: var(--footer-text);
+    text-decoration: none;
+    font-size: 0.92rem;
+    transition: all 0.25s ease;
+    display: inline-block;
+    padding: 2px 0;
+    position: relative;
+}
+
+.footer-links a i {
+    color: var(--footer-accent);
+    font-size: 0.8rem;
+    transition: transform 0.25s ease;
+}
+
+.footer-links a:hover {
+    color: #fff;
+    padding-left: 6px;
+}
+
+.footer-links a:hover i {
+    transform: translateX(4px);
+}
+
+/* --- Contact --- */
+.footer-contact li {
+    color: var(--footer-text);
+    margin-bottom: 0.5rem;
+    font-size: 0.92rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    transition: color 0.25s ease;
+}
+
+.footer-contact li:hover {
+    color: var(--footer-text-light);
+}
+
+.footer-contact i {
+    color: var(--footer-accent);
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.footer-contact a {
+    color: var(--footer-text);
+    text-decoration: none;
+    transition: color 0.25s ease;
+}
+
+.footer-contact a:hover {
+    color: var(--footer-accent);
+}
+
+/* --- Badges --- */
+.footer-badge {
+    display: inline-block;
+    padding: 0.2rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    font-size: 0.7rem;
+    color: var(--footer-text);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+}
+
+/* --- Affichage année --- */
+.footer-year-display {
+    padding: 0.5rem 0;
+}
+
+.footer-year-display .display-6 {
+    font-size: 2.2rem;
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+/* --- Stats mini --- */
+.footer-bottom .text-secondary {
+    color: var(--footer-text) !important;
+}
+
+/* --- Bottom Bar --- */
+.footer-bottom {
+    border-top: 1px solid var(--footer-border);
+    background: rgba(0, 0, 0, 0.3);
+    font-size: 0.85rem;
+    color: var(--footer-text);
+    border-radius: 0 0 12px 12px;
+}
+
+.footer-bottom .hover-text-primary {
+    transition: color 0.25s ease;
+}
+
+.footer-bottom .hover-text-primary:hover {
+    color: var(--footer-accent) !important;
+}
+
+/* --- Bouton remonter --- */
+.footer-bottom a i.bi-arrow-up-circle-fill {
+    font-size: 1.5rem;
+    color: var(--footer-text);
+    transition: all 0.3s ease;
+    opacity: 0.5;
+}
+
+.footer-bottom a i.bi-arrow-up-circle-fill:hover {
+    color: var(--footer-accent);
+    opacity: 1;
+    transform: translateY(-3px);
+}
+
+/* ============================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================ */
+
+@media (max-width: 991.98px) {
+    .site-footer {
+        margin-top: 2.5rem;
+    }
+    
+    .footer-year-display .display-6 {
+        font-size: 1.8rem;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .site-footer .row.g-5 {
+        --bs-gap: 2rem;
+    }
+    
+    .footer-title {
+        margin-top: 0.5rem;
+    }
+    
+    .footer-bottom .row > div {
+        text-align: center !important;
+    }
+    
+    .footer-bottom .row > div:first-child {
+        margin-bottom: 0.5rem;
+    }
+}
+
+@media (max-width: 575.98px) {
+    .footer-brand-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+    
+    .footer-year-display .display-6 {
+        font-size: 1.5rem;
+    }
+    
+    .footer-contact li {
+        font-size: 0.85rem;
+    }
+    
+    .footer-bottom {
+        font-size: 0.75rem;
+    }
+}
+
+/* ============================================
+   ANIMATIONS
+   ============================================ */
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.site-footer .row.g-5 > div {
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+}
+
+.site-footer .row.g-5 > div:nth-child(1) { animation-delay: 0.05s; }
+.site-footer .row.g-5 > div:nth-child(2) { animation-delay: 0.15s; }
+.site-footer .row.g-5 > div:nth-child(3) { animation-delay: 0.25s; }
+.site-footer .row.g-5 > div:nth-child(4) { animation-delay: 0.35s; }

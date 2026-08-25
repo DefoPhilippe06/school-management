@@ -185,7 +185,7 @@ def import_students_task(self, file_content, filename, admin_email, admin_id):
                 error_count += 1
                 errors.append(f"Ligne {row_num} : {str(e)}")
 
-        # Email de confirmation
+# Email de confirmation
         subject = f"Import élèves terminé — {success_count} réussis, {error_count} échecs"
         message = f"""
 Bonjour,
@@ -206,13 +206,16 @@ Résumé :
 
         message += "\nCordialement,\nSystème de Gestion Scolaire"
 
-        send_mail(
-            subject,
-            message,
-            settings.DEFAULT_FROM_EMAIL,
-            [admin_email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                [admin_email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
 
         return {
             'success': success_count,
@@ -221,11 +224,14 @@ Résumé :
         }
 
     except Exception as e:
-        send_mail(
-            "Échec de l'import des élèves",
-            f"Une erreur critique est survenue lors de l'import :\n\n{str(e)}",
-            settings.DEFAULT_FROM_EMAIL,
-            [admin_email],
-            fail_silently=True,
-        )
+        try:
+            send_mail(
+                "Échec de l'import des élèves",
+                f"Une erreur critique est survenue lors de l'import :\n\n{str(e)}",
+                settings.DEFAULT_FROM_EMAIL,
+                [admin_email],
+                fail_silently=True,
+            )
+        except Exception:
+            pass
         raise
