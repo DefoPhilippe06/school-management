@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from accounts.decorators import role_required
+from accounts.password_utils import generate_password, send_credentials_email
 from .models import Teacher
 from classes.models import ClassRoom
 from subjects.models import Subject
@@ -73,13 +74,14 @@ def teacher_save(request):
                 messages.error(request, "Ce matricule existe déjà.")
                 return redirect('teacher_list')
 
+            raw_password = generate_password()
             user = User.objects.create_user(
                 username=username,
                 email=email,
                 first_name=first_name,
                 last_name=last_name,
                 role=User.Role.TEACHER,
-                password='Temp1234'  # l'enseignant devra changer
+                password=raw_password,
             )
 
             teacher = Teacher.objects.create(
@@ -94,7 +96,18 @@ def teacher_save(request):
                 subject = Subject.objects.get(id=sid)
                 subject.teachers.add(teacher)
 
-            messages.success(request, f"Enseignant {user.get_full_name()} créé. Mot de passe temporaire : Temp1234")
+            email_sent = send_credentials_email(user, raw_password)
+            if email_sent:
+                messages.success(
+                    request,
+                    f"Enseignant {user.get_full_name()} créé. Identifiants envoyés à {email}."
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Enseignant {user.get_full_name()} créé. Mot de passe : {raw_password} "
+                    f"(aucun email — notez-le)."
+                )
 
     return redirect('teacher_list')
 

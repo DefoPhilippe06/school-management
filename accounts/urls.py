@@ -9,4 +9,8 @@ urlpatterns = [
     path('enseignant/', views.teacher_dashboard, name='teacher_dashboard'),
     path('notification/<int:pk>/read/', views.mark_notification_read, name='mark_notification_read'),
     path('notifications/read-all/', views.mark_all_notifications_read, name='mark_all_notifications_read'),
+    path('admins/', views.admin_list, name='admin_list'),
+    path('admins/save/', views.admin_save, name='admin_save'),
+    path('admins/delete/<int:pk>/', views.admin_delete, name='admin_delete'),
+    path('profil/', views.profile_edit, name='profile_edit'),
 ]

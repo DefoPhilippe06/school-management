@@ -1,0 +1,123 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Administrateurs{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="page-title">Administrateurs</h2>
+        <p class="page-subtitle">Gestion des comptes administrateurs</p>
+    </div>
+    <button class="btn btn-primary" onclick="openAdminModal()">
+        <i class="bi bi-plus-lg me-1"></i> Nouvel admin
+    </button>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead>
+                    <tr>
+                        <th>Nom complet</th>
+                        <th>Nom d'utilisateur</th>
+                        <th>Email</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for a in admins %}
+                    <tr>
+                        <td class="fw-semibold">{{ a.get_full_name|default:"—" }}</td>
+                        <td>{{ a.username }}</td>
+                        <td>{{ a.email|default:"—" }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1"
+                                    onclick="openAdminModal(
+                                        {{ a.id }},
+                                        '{{ a.first_name|escapejs }}',
+                                        '{{ a.last_name|escapejs }}',
+                                        '{{ a.username|escapejs }}',
+                                        '{{ a.email|escapejs }}'
+                                    )">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            {% if a.id != request.user.id %}
+                            <a href="{% url 'admin_delete' a.id %}"
+                               class="btn btn-sm btn-outline-danger"
+                               onclick="return confirm('Supprimer {{ a.username }} ?')">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center text-muted py-5">Aucun administrateur</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Admin -->
+<div class="modal fade" id="adminModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'admin_save' %}">
+                {% csrf_token %}
+                <input type="hidden" name="admin_id" id="admin_id">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="adminModalTitle">Nouvel administrateur</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Prénom</label>
+                            <input type="text" name="first_name" id="admin_first_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nom</label>
+                            <input type="text" name="last_name" id="admin_last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nom d'utilisateur</label>
+                            <input type="text" name="username" id="admin_username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" id="admin_email" class="form-control"
+                                   placeholder="Pour recevoir le mot de passe">
+                        </div>
+                    </div>
+                    <p class="small text-muted mt-3 mb-0">
+                        À la création, un mot de passe unique est généré et envoyé par email si une adresse est renseignée.
+                    </p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="submit" class="btn btn-primary">Enregistrer</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openAdminModal(id, first, last, username, email) {
+    document.getElementById('admin_id').value = id || '';
+    document.getElementById('admin_first_name').value = first || '';
+    document.getElementById('admin_last_name').value = last || '';
+    document.getElementById('admin_username').value = username || '';
+    document.getElementById('admin_email').value = email || '';
+    document.getElementById('admin_username').readOnly = !!id;
+    document.getElementById('adminModalTitle').innerText = id ? 'Modifier l\'administrateur' : 'Nouvel administrateur';
+    new bootstrap.Modal(document.getElementById('adminModal')).show();
+}
+</script>
+{% endblock %}
