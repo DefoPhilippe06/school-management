@@ -50,5 +50,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Mon compte-->
+    <div class="col-md-4">
+        <div class="card h-100 text-center border-0 shadow-sm">
+            <div class="card-body py-5">
+                <div class="bg-secondary bg-opacity-10 text-secondary rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 70px; height: 70px;">
+                    <i class="bi bi-person-gear fs-2"></i>
+                </div>
+                <h5>Mon compte</h5>
+                <p class="text-muted small">Modifier identifiant et mot de passe</p>
+                <a href="{% url 'profile_edit' %}" class="btn btn-secondary btn-sm">Accéder</a>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}
