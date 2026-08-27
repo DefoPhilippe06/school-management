@@ -122,3 +122,81 @@ def mark_all_notifications_read(request):
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     messages.success(request, "Toutes les notifications ont été marquées comme lues.")
     return redirect(request.META.get('HTTP_REFERER', 'dashboard'))
+
+from django.contrib.auth import get_user_model
+from accounts.decorators import role_required
+from accounts.password_utils import generate_password, send_credentials_email
+
+User = get_user_model()
+
+
+@login_required
+@role_required('ADMIN')
+def admin_list(request):
+    admins = User.objects.filter(role=User.Role.ADMIN).order_by('last_name', 'first_name')
+    return render(request, 'accounts/admin_list.html', {'admins': admins})
+
+
+@login_required
+@role_required('ADMIN')
+def admin_save(request):
+    if request.method == 'POST':
+        admin_id = request.POST.get('admin_id')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+
+        if admin_id:
+            admin = get_object_or_404(User, id=admin_id, role=User.Role.ADMIN)
+            admin.first_name = first_name
+            admin.last_name = last_name
+            admin.email = email
+            if username and username != admin.username:
+                if User.objects.filter(username=username).exclude(pk=admin.pk).exists():
+                    messages.error(request, "Ce nom d'utilisateur existe déjà.")
+                    return redirect('admin_list')
+                admin.username = username
+            admin.save()
+            messages.success(request, f"Administrateur {admin.get_full_name()} modifié.")
+        else:
+            if User.objects.filter(username=username).exists():
+                messages.error(request, "Ce nom d'utilisateur existe déjà.")
+                return redirect('admin_list')
+
+            raw_password = generate_password()
+            admin = User.objects.create_user(
+                username=username,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                role=User.Role.ADMIN,
+                password=raw_password,
+            )
+            email_sent = send_credentials_email(admin, raw_password)
+            if email_sent:
+                messages.success(
+                    request,
+                    f"Admin {admin.get_full_name()} créé. Identifiants envoyés à {email}."
+                )
+            else:
+                messages.success(
+                    request,
+                    f"Admin {admin.get_full_name()} créé. Mot de passe : {raw_password} "
+                    f"(aucun email — notez-le)."
+                )
+
+    return redirect('admin_list')
+
+
+@login_required
+@role_required('ADMIN')
+def admin_delete(request, pk):
+    admin = get_object_or_404(User, pk=pk, role=User.Role.ADMIN)
+    if admin.pk == request.user.pk:
+        messages.error(request, "Vous ne pouvez pas supprimer votre propre compte.")
+        return redirect('admin_list')
+    name = admin.get_full_name() or admin.username
+    admin.delete()
+    messages.success(request, f"Administrateur {name} supprimé.")
+    return redirect('admin_list')
